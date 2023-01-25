@@ -3,3 +3,4 @@ django-nose
 flake8
 mock
 psycopg2
+flake8

@@ -1,4 +1,5 @@
 import os
+import json
 
 from django.conf import settings
 
@@ -12,23 +13,30 @@ def configure_settings():
         test_db = os.environ.get('DB', None)
         if test_db is None:
             db_config = {
-                'ENGINE': 'django.db.backends.postgresql_psycopg2',
-                'NAME': 'ambition',
-                'USER': 'ambition',
-                'PASSWORD': 'ambition',
-                'HOST': 'db'
+                'ENGINE': 'django.db.backends.postgresql',
+                'NAME': 'django_kmatch',
+                'USER': 'postgres',
+                'PASSWORD': '',
+                'HOST': 'db',
             }
         elif test_db == 'postgres':
             db_config = {
-                'ENGINE': 'django.db.backends.postgresql_psycopg2',
-                'USER': 'postgres',
+                'ENGINE': 'django.db.backends.postgresql',
                 'NAME': 'django_kmatch',
+                'USER': 'postgres',
+                'PASSWORD': '',
+                'HOST': 'db',
             }
         else:
             raise RuntimeError('Unsupported test DB {0}'.format(test_db))
 
+        # Check env for db override (used for github actions)
+        if os.environ.get('DB_SETTINGS'):
+            db_config = json.loads(os.environ.get('DB_SETTINGS'))
+
         settings.configure(
             TEST_RUNNER='django_nose.NoseTestSuiteRunner',
+            SECRET_KEY='*',
             NOSE_ARGS=['--nocapture', '--nologcapture', '--verbosity=1'],
             MIDDLEWARE_CLASSES=(),
             DATABASES={
